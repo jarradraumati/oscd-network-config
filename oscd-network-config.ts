@@ -353,16 +353,17 @@ export default class NetworkConfig extends LitElement {
         }
 
         return `interface ${portInfo.portName}
-  description ${this.substation} Protection ${this.protectionSystem} LAN ${
-    this.prpNetwork
-  } to ${iedName} ${portInfo.receivingPortName} 
+  description ${iedName} ${portInfo.receivingPortName} LAN ${this.prpNetwork}
   switchport trunk native vlan ${this.nativeVlanUI.value}
   switchport trunk allowed vlan ${this.nativeVlanUI.value}${
     vlans.length > 1 ? `,${vlans.join(',')}` : ''
   }
   switchport mode trunk
   load-interval 30${selSpecial !== null ? selSpecial : ''}
+  storm-control broadcast level 3.00
+  storm-control action trap
   spanning-tree portfast trunk
+  spanning-tree bpduguard enable
   service-policy input pm-dss-prot-vlan-mark-in
   service-policy output pm-dss-lan-out${
     smvMacsIngress.length > 0 ? `\n  mac access-group ${macFilterInACL} in` : ''
@@ -458,8 +459,9 @@ export default class NetworkConfig extends LitElement {
             class="selection-item"
             id="nativeVlan"
             label="Native VLAN (decimal)"
-            value="1000"
-            maxlength="5"
+            placeholder="101"
+            maxlength="4"
+            required
           >
           </md-outlined-text-field>
           <md-filled-button
@@ -528,7 +530,7 @@ export default class NetworkConfig extends LitElement {
           <md-icon slot="icon">download</md-icon>
         </md-outlined-button>
       </section>
-      
+
       <input @click=${
         // eslint-disable-next-line no-return-assign
         (event: MouseEvent) =>
@@ -578,6 +580,10 @@ export default class NetworkConfig extends LitElement {
 
     #ethernetSwitch {
       width: 300px;
+    }
+
+    #nativeVlan {
+      width: 220px;
     }
 
     #selection {
